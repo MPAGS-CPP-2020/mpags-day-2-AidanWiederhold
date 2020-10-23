@@ -10,6 +10,7 @@
 // Include the transliterator
 #include "TransformChar.hpp"
 #include "ProcessCommandLine.hpp"
+#include "runCaesarCipher.hpp"
 
 // Main function of the mpags-cipher program
 int main(int argc, char* argv[])
@@ -22,9 +23,11 @@ int main(int argc, char* argv[])
   bool versionRequested {false};
   std::string inputFile {""};
   std::string outputFile {""};
+  bool crypt{true};
+  std::size_t key{3};
   // Process command line arguments - ignore zeroth element, as we know this to
   // be the program name and don't need to worry about it
-  if(!processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile))
+  if(!processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile, crypt, key))
   {
     std::cerr << "Command line error, please use -h option to understand how to use the programme." << std::endl;
     return 1;
@@ -91,9 +94,11 @@ int main(int argc, char* argv[])
     }
   }
 
+  std::string outputText{runCaesarCipher(inputText, key, crypt)};
+
   if(outputFile.empty())
   {
-    std::cout << inputText << std::endl;
+    std::cout << outputText << std::endl;
   }
   else if(!ok_to_write)
   {
@@ -102,7 +107,7 @@ int main(int argc, char* argv[])
   }
   else
   {
-    out_file << inputText << "\n";
+    out_file << outputText << "\n";
   }
   // No requirement to return from main, but we do so for clarity
   // and for consistency with other functions
