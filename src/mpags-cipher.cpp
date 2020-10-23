@@ -2,6 +2,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <fstream>
 
 // For std::isalpha and std::isupper
 #include <cctype>
@@ -21,9 +22,19 @@ int main(int argc, char* argv[])
   bool versionRequested {false};
   std::string inputFile {""};
   std::string outputFile {""};
-// Process command line arguments - ignore zeroth element, as we know this to
+  // Process command line arguments - ignore zeroth element, as we know this to
   // be the program name and don't need to worry about it
-  processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile);
+  if(!processCommandLine(cmdLineArgs, helpRequested, versionRequested, inputFile, outputFile))
+  {
+    std::cerr << "Command line error, please use -h option to understand how to use the programme." << std::endl;
+    return 1;
+  }
+
+  std::ifstream in_file{inputFile};
+  bool ok_to_read = in_file.good();
+
+  std::ofstream out_file{outputFile};
+  bool ok_to_write = out_file.good();
 
   // Handle help, if requested
   if (helpRequested) {
@@ -40,7 +51,7 @@ int main(int argc, char* argv[])
       << "                   Stdout will be used if not supplied\n\n";
     // Help requires no further action, so return from main
     // with 0 used to indicate success
-    return 0;
+    return 2;
   }
 
   // Handle version, if requested
@@ -48,38 +59,51 @@ int main(int argc, char* argv[])
   // so return from main with zero to indicate success
   if (versionRequested) {
     std::cout << "0.1.0" << std::endl;
-    return 0;
+    return 3;
   }
 
   // Initialise variables for processing input text
   char inputChar {'x'};
   std::string inputText {""};
 
-  // Read in user input from stdin/file
-  // Warn that input file option not yet implemented
-  if (!inputFile.empty()) {
-    std::cout << "[warning] input from file ('"
-              << inputFile
-              << "') not implemented yet, using stdin\n";
-  }
-
+  // If no input file then read input from command line
+  // if input file named check it can be opened
+  // if it can be opened then use it as input
   // Loop over each character from user input
   // (until Return then CTRL-D (EOF) pressed)
-  while(std::cin >> inputChar)
+  if(inputFile.empty())
   {
-    inputText += transformChar(inputChar);
+    while(std::cin >> inputChar)
+    {
+      inputText += transformChar(inputChar);
+    }
+  }
+  else if(!ok_to_read)
+  {
+    std::cerr << "Could not open input file!" << std::endl;
+    return 4;
+  }
+  else
+  {
+    while(in_file >> inputChar)
+    {
+      inputText += transformChar(inputChar);
+    }
   }
 
-  // Output the transliterated text
-  // Warn that output file option not yet implemented
-  if (!outputFile.empty()) {
-    std::cout << "[warning] output to file ('"
-              << outputFile
-              << "') not implemented yet, using stdout\n";
+  if(outputFile.empty())
+  {
+    std::cout << inputText << std::endl;
   }
-
-  std::cout << inputText << std::endl;
-
+  else if(!ok_to_write)
+  {
+    std::cerr << "Could not open output file!" << std::endl;
+    return 5;
+  }
+  else
+  {
+    out_file << inputText << "\n";
+  }
   // No requirement to return from main, but we do so for clarity
   // and for consistency with other functions
   return 0;
