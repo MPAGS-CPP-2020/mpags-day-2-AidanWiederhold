@@ -51,7 +51,9 @@ int main(int argc, char* argv[])
       << "  -i FILE          Read text to be processed from FILE\n"
       << "                   Stdin will be used if not supplied\n\n"
       << "  -o FILE          Write processed text to FILE\n"
-      << "                   Stdout will be used if not supplied\n\n";
+      << "                   Stdout will be used if not supplied\n\n"
+      << "  --key INTEGER    Use this value as the key for the Caesar cipher\n\n"
+      << "  --encrypt BOOL   use true to encrypt and false to decrypt\n\n";
     // Help requires no further action, so return from main
     // with 0 used to indicate success
     return 2;
@@ -61,7 +63,7 @@ int main(int argc, char* argv[])
   // Like help, requires no further action,
   // so return from main with zero to indicate success
   if (versionRequested) {
-    std::cout << "0.1.0" << std::endl;
+    std::cout << "0.2.0" << std::endl;
     return 3;
   }
 
